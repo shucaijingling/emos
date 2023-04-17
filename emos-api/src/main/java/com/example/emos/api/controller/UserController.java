@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaMode;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.json.JSONUtil;
+import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.common.util.R;
 import com.example.emos.api.controller.form.*;
 import com.example.emos.api.service.UserService;
@@ -126,5 +127,18 @@ public class UserController {
         };
         int rows = userService.updatePassword(map);
         return R.ok().put("row", rows);
+    }
+
+    @PostMapping("/searchUserByPage")
+    @Operation(summary = "查询用户分页记录")
+    @SaCheckPermission(value = {"ROOT", "USER:SELECT"}, mode = SaMode.OR)
+    public R searchUserByPage(@Valid @RequestBody SearchUserByPageForm form) {
+        Integer page = form.getPage();
+        Integer length = form.getLength();
+        int start = (page - 1) * length;
+        HashMap parm = JSONUtil.parse(form).toBean(HashMap.class);
+        parm.put("start", start);
+        PageUtils pageUtils = userService.searchUserByPage(parm);
+        return R.ok().put("page", pageUtils);
     }
 }

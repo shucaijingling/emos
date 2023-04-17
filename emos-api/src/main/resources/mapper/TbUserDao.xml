@@ -85,13 +85,13 @@
             u.tel,
             u.email,
             d.dept_name AS dept,
-            u.hiredata,
+            u.hiredate,
             u.root,
             u.status,
             (
                 SELECT GROUP_CONCAT( role_name separator ",")
                 FROM tb_role
-                WHERE JOSN_CONTAINS( u.role, CONVERT(id, CHAR))
+                WHERE JSON_CONTAINS( u.role, CONVERT(id, CHAR))
             ) AS roles
         FROM tb_user u
         JOIN tb_role r ON JSON_CONTAINS (u.role, CONVERT( r.id, CHAR))
