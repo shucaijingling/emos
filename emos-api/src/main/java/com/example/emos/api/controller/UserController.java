@@ -8,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.common.util.R;
 import com.example.emos.api.controller.form.*;
+import com.example.emos.api.db.pojo.TbUser;
 import com.example.emos.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -140,5 +142,17 @@ public class UserController {
         parm.put("start", start);
         PageUtils pageUtils = userService.searchUserByPage(parm);
         return R.ok().put("page", pageUtils);
+    }
+
+    @PostMapping("/insert")
+    @SaCheckPermission(value = {"ROOT", "USER:INSERT"}, mode = SaMode.OR)
+    @Operation(summary = "添加用户")
+    public R insert(@Valid @RequestBody InsertUserForm form) {
+        TbUser tbUser = JSONUtil.parse(form).toBean(TbUser.class);
+        tbUser.setStatus((byte) 1);
+        tbUser.setRole(JSONUtil.parseArray(form.getRole()).toString());
+        tbUser.setCreateTime(new Date());
+        int rows = userService.insert(tbUser);
+        return R.ok().put("rows", rows);
     }
 }

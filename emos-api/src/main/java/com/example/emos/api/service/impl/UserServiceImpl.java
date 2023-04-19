@@ -9,6 +9,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.db.dao.TbUserDao;
+import com.example.emos.api.db.pojo.TbUser;
 import com.example.emos.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -126,6 +127,11 @@ public class UserServiceImpl implements UserService {
         int start = (int) map.get("start");
         int length = (int) map.get("length");
         return new PageUtils(list, count, start, length);
+    }
+
+    @Override
+    public int insert(TbUser tbUser) {
+        return userDao.insert(tbUser);
     }
 
     private String getOpenId(String code) {

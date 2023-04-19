@@ -1,6 +1,7 @@
 package com.example.emos.api.service;
 
 import com.example.emos.api.common.util.PageUtils;
+import com.example.emos.api.db.pojo.TbUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,4 +27,6 @@ public interface UserService {
     public int updatePassword(HashMap map);
 
     public PageUtils searchUserByPage(HashMap map);
+
+    public int insert(TbUser tbUser);
 }

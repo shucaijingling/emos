@@ -1,5 +1,6 @@
 package com.example.emos.api.db.dao;
 
+import com.example.emos.api.db.pojo.TbUser;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
@@ -32,5 +33,7 @@ public interface TbUserDao {
     public ArrayList<HashMap> searchUserByPage(HashMap map);
 
     public long searchUserCount(HashMap map);
+
+    public int insert(TbUser tbUser);
 
 }
