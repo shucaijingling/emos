@@ -77,6 +77,7 @@
         WHERE id=#{userId}
     </update>
 
+
     <select id="searchUserByPage" parameterType="hashmap" resultType="java.util.HashMap">
         SELECT
             DISTINCT u.id,
@@ -179,4 +180,40 @@
         status=#{status},
         create_time=#{createTime}
     </insert>
+
+    <update id="update" parameterType="hashmap">
+        update tb_user
+        set
+        <if test="username!=null and password!=null">
+            username=#{username},
+            password= HEX(AES_ENCRYPT(#{password},#{username})),
+        </if>
+        <if test="name!=null">
+            name=#{name},
+        </if>
+        <if test="sex!=null">
+            sex=#{sex},
+        </if>
+        <if test="email!=null">
+            email=#{email},
+        </if>
+        <if test="hiredate!=null">
+            hiredate=#{hiredate},
+        </if>
+        <if test="role!=null">
+            role=#{role},
+        </if>
+        <if test="root!=null">
+            root=#{root},
+        </if>
+        <if test="deptId!=null">
+            dept_id=#{deptId},
+        </if>
+        <if test="status!=null">
+            status=#{status},
+        </if>
+            id=id
+        where id=#{userId}
+    </update>
+
 </mapper>

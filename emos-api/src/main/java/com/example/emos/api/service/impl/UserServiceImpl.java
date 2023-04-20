@@ -134,6 +134,11 @@ public class UserServiceImpl implements UserService {
         return userDao.insert(tbUser);
     }
 
+    @Override
+    public int update(HashMap map) {
+        return userDao.update(map);
+    }
+
     private String getOpenId(String code) {
         String url = "https://api.weixin.qq.com/sns/jscode2session";
         HashMap map = new HashMap();

@@ -155,4 +155,18 @@ public class UserController {
         int rows = userService.insert(tbUser);
         return R.ok().put("rows", rows);
     }
+
+    @PostMapping("/update")
+    @SaCheckPermission(value = {"ROOT", "USER:UPDATE"}, mode = SaMode.OR)
+    @Operation(summary = "添加用户")
+    public R update(@Valid @RequestBody UpdateUserForm form) {
+        HashMap hashMap = JSONUtil.parse(form).toBean(HashMap.class);
+        hashMap.replace("role", JSONUtil.parseArray(form.getRole()).toString());
+        int rows = userService.update(hashMap);
+        if (rows == 1) {
+            //修改后踢下线
+            StpUtil.logoutByLoginId(form.getUserId());
+        }
+        return R.ok().put("rows", rows);
+    }
 }

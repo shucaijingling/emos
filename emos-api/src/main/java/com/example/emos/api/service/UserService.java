@@ -29,4 +29,6 @@ public interface UserService {
     public PageUtils searchUserByPage(HashMap map);
 
     public int insert(TbUser tbUser);
+
+    public int update(HashMap map);
 }
