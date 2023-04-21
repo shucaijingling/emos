@@ -3,7 +3,10 @@ package com.example.emos.api.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.db.dao.TbMeetingDao;
+import com.example.emos.api.db.pojo.TbMeeting;
+import com.example.emos.api.exception.EmosException;
 import com.example.emos.api.service.MeetingService;
+import com.example.emos.api.task.MeetingWorkflowTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,9 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Autowired
     private TbMeetingDao tbMeetingDao;
+
+    @Autowired
+    private MeetingWorkflowTask meetingWorkflowTask;
 
     @Override
     public PageUtils ssearchOfflineMeetingByPage(HashMap map) {
@@ -31,5 +37,16 @@ public class MeetingServiceImpl implements MeetingService {
             }
         }
         return new PageUtils(list,count,start,length);
+    }
+
+    @Override
+    public int insert(TbMeeting meeting) {
+        int rows = tbMeetingDao.insert(meeting);
+        if (rows != 1) {
+            throw new EmosException("会议添加失败");
+        }
+        meetingWorkflowTask.startMeetingWorkflow(meeting.getUuid(), meeting.getCreatorId(), meeting.getTitle(),
+                meeting.getDate(), meeting.getStart()+ ":00", "线下会议");
+        return rows;
     }
 }

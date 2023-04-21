@@ -1,5 +1,6 @@
 package com.example.emos.api.db.dao;
 
+import com.example.emos.api.db.pojo.TbMeeting;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
@@ -15,4 +16,6 @@ public interface TbMeetingDao {
     public long searchOfflineMeetingCount(HashMap map);
 
     public int updateMeetingInstanceId(HashMap map);
+
+    public int insert(TbMeeting meeting);
 }

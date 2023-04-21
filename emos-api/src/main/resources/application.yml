@@ -95,3 +95,11 @@ tencent:
 wx:
   app-id: wx99546af32003af51
   app-secret: 9f05a298cd9cf0306350c044f4ccb53d
+
+emos:
+  code: code
+  tcode: tcode
+  receiveNotify: http://localhost:8090/emos-api/meeting/recieveNotify
+
+workflow:
+  url: http://localhost:9090/emos-workflow
