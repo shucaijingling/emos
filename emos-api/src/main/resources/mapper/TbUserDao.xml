@@ -216,4 +216,13 @@
         where id=#{userId}
     </update>
 
+    <delete id="deleteUserByIds">
+        DELETE FROM
+                tb_user
+        WHERE id in
+        <foreach collection="array" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+        AND root=FALSE
+    </delete>
 </mapper>

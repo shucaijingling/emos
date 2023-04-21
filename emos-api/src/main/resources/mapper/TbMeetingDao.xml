@@ -27,4 +27,43 @@
         JOIN tb_user u ON m.creator_id = u.id
         WHERE m.id =#{id} AND u.status = 1
     </select>
+
+    <select id="searchOfflineMeetingByPage" parameterType="hashmap" resultType="hashmap">
+        select mr.name, temp.meeting
+        from tb_meeting_room mr
+        left join (
+            select place,
+                   CONCAT(
+                       "[",
+                       GROUP_CONCAT(
+                           JSON_OBJECT('start', DATE_FORMAT(start, '%H:%i'),
+                                        'end', DATE_FORMAT(end, '%H:%i'),
+                                        'status', `status`,
+                                        'time', ROUND(timestampdiff(MINUTE,CONCAT(date,"",start),CONCAT(date,"",end))/30)
+                                     )
+                        ),"]"
+        ) as meeting
+            from tb_meeting
+            where type = 2 and `status` != 2 and date=#{date}
+            <if test="mold=='我的会议'">
+                and JSON_CONTAINS(mebers, CAST(#{userId} as CHAR))
+            </if>
+            GROUP BY place
+        ) temp
+        on mr.name=temp.place
+        where mr.status=1
+        limit #{start}, #{length}
+    </select>
+
+    <select id="searchOfflineMeetingCount" parameterType="hashmap" resultType="long">
+        select count(*)
+        from tb_meeting_room
+        where status=1
+    </select>
+
+    <update id="updateMeetingInstanceId" parameterType="hashmap">
+        update tb_meeting
+        set instance_id=#{instanceId}
+        where uuid=#{uuid}
+    </update>
 </mapper>
