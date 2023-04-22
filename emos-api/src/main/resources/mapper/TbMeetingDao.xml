@@ -87,4 +87,63 @@
             status=#{status},
             create_time=NOW()
     </insert>
+
+    <select id="searchOfflineMeetingInWeek" parameterType="hashmap" resultType="hashmap">
+        select
+                id,
+                title,
+                DATE_FORMAT(`date`, "%m/%d") as `date`,
+                DATE_FORMAT(start, '%H:%i') as `start`,
+                ROUND(timestampdiff(MINUTE,CONCAT(`date`, " ", `start`),CONCAT(`date`, " ", `end`))/30) as `date`,
+                uuid,
+                instance_id as instanceId,
+                IF(creator_id=#{userId},"true","false") as isCreator,
+                `status`
+        from tb_meeting
+        where type = 2
+        and place=#{place}
+        and `status` != 2
+        and date between #{startDate} and #{endDate}
+        <if test="mold=='我的会议'">
+            and JSON_CONTAINS(members, cast(#{userId} as CHAR))
+        </if>
+    </select>
+
+    <select id="searchMeetingInfo" parameterType="long" resultType="hashmap">
+        select m.title,
+               m.date,
+               m.place,
+               DATE_FORMAT(m.`start`, '%H:%I') AS `start`,
+               DATE_FORMAT(m.`end`, '%H:%I') AS `end`,
+               m.status,
+               CONCAT("[", GROUP_CONCAT(JSON_OBJECT("name", u.name, "photo", u.photo)) separator '，')
+        from tb_meeting m
+        left join tb_user u on JSON_CONTAINS(m.members, convert(u.id, CHAR))
+        where m.id = #{id} and u.status=1
+    </select>
+
+    <select id="searchCurrentMeetingInfo" parameterType="long" resultType="hashmap">
+        select m.title,
+               m.date,
+               m.place,
+               date_format(m.`start`,'%H:%i') as `start`,
+               date_format(m.`end`,'%H:%i') as `end`,
+               m.status,
+               (
+                  select concat("[", group_concat( json_object( "name", u,name, "photo", u.photo)) separator '，')
+                  from tb_user u where json_contains(m.present, convert(u.id, char))
+                ) as present,
+                (
+                  select concat("[", group_concat( json_object("name", u.name, "photo", u.photo)) separator '，')
+                  from tb_user u where json_contains(m.unpresent, convert(u.id, char))
+                ) as unpresent
+        from tb_meeting m
+        where m.id = #{id}
+    </select>
+
+    <delete id="deleteMeetingApplication" parameterType="hashmap">
+        delete
+        from tb_meeting
+        where id=#{id} and creator_id=#{creatorId};
+    </delete>
 </mapper>

@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -52,7 +53,7 @@ public class MeetingWorkflowTask {
         jsonObject.set("url", receiveNotify);
         jsonObject.set("uuid", uuid);
         jsonObject.set("creatorId", creatorId);
-        jsonObject.set("createorName", info.get("name").toString());
+        jsonObject.set("creatorName", info.get("name").toString());
         jsonObject.set("code", code);
         jsonObject.set("tcode", tcode);
         jsonObject.set("title", title);
@@ -79,7 +80,8 @@ public class MeetingWorkflowTask {
         HttpResponse response = HttpRequest.post(url).header("Content-Type", "application/json").body(jsonObject.toString()).execute();
         if (response.getStatus() == 200) {
             jsonObject = JSONUtil.parseObj(response.body());
-            String instanceId = jsonObject.getStr("instanceId");
+//            String instanceId = jsonObject.getStr("instanceId");
+            String instanceId = UUID.randomUUID().toString();
             HashMap map = new HashMap<>();
             map.put("uuid", uuid);
             map.put("instanceId", instanceId);
@@ -90,6 +92,26 @@ public class MeetingWorkflowTask {
             }
         }else {
             log.error(response.body());
+        }
+    }
+
+    @Async("AsyncTaskExecutor")
+    public void deleteMeetingApplication(String uuid, String instanceId, String reason) {
+        JSONObject json = new JSONObject();
+        json.set("uuid",uuid);
+        json.set("instanceId",instanceId);
+        json.set("code",code);
+        json.set("tcode",tcode);
+        json.set("type","会议申请");
+        json.set("reason",reason);
+        String url = workflow + "/workflow/deleteProcessById";
+        HttpResponse resp = HttpRequest.post(url).header("Content-type", "application/json")
+                .body(json.toString()).execute();
+
+        if (resp.getStatus() == 200) {
+            log.debug("删除会议申请成功");
+        }else {
+            log.error(resp.body());
         }
     }
 }

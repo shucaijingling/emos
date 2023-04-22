@@ -18,4 +18,12 @@ public interface TbMeetingDao {
     public int updateMeetingInstanceId(HashMap map);
 
     public int insert(TbMeeting meeting);
+
+    public ArrayList<HashMap> searchOfflineMeetingInWeek(HashMap map);
+
+    public HashMap searchMeetingInfo(long id);
+
+    public HashMap searchCurrentMeetingInfo(long id);
+
+    public int deleteMeetingApplication(HashMap map);
 }

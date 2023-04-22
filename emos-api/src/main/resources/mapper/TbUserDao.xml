@@ -225,4 +225,11 @@
         </foreach>
         AND root=FALSE
     </delete>
+
+    <select id="searchUserRoles" parameterType="int" resultType="string">
+        select r.role_name as roleName
+        from tb_user u
+        join tb_role r on json_contains (u.role, convert(r.id, char))
+        where u.id=#{userId}
+    </select>
 </mapper>

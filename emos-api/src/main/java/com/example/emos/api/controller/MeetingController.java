@@ -2,14 +2,15 @@ package com.example.emos.api.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.common.util.R;
-import com.example.emos.api.controller.form.InsertMeetingForm;
-import com.example.emos.api.controller.form.ReceiveNotifyForm;
-import com.example.emos.api.controller.form.SearchOfflineMeetingByPageForm;
+import com.example.emos.api.controller.form.*;
 import com.example.emos.api.db.pojo.TbMeeting;
 import com.example.emos.api.service.MeetingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -80,5 +83,56 @@ public class MeetingController {
             log.debug(form.getUuid() + "的会议审批不通过");
         }
         return R.ok();
+    }
+
+    @PostMapping("/searchMeetingInfo")
+    @Operation(summary = "查询会议信息")
+    @SaCheckLogin
+    public R searchMeetingInfo(@Valid @RequestBody SearchMeetingInfoForm form) {
+        HashMap map = meetingService.searchMeetingInfo(form.getStatus(), form.getId());
+        return R.ok(map);
+    }
+
+    @PostMapping("/searchOfflineMeetingInWeek")
+    @Operation(summary = "查询某个会议室一周的会议")
+    @SaCheckLogin
+    public R searchOfflineMeetingInWeek(@Valid @RequestBody SearchOfflineMeetingInWeekForm form) {
+        String date = form.getDate();
+        DateTime startDate, endDate;
+        if (date!= null && date.length()>0) {
+            startDate = DateUtil.parse(date);
+            endDate = startDate.offsetNew(DateField.DAY_OF_WEEK,6);
+        }else {
+            startDate = DateUtil.beginOfWeek(new Date());
+            endDate = DateUtil.endOfWeek(new Date());
+        }
+        HashMap map = new HashMap<>(){{
+            put("place", form.getName());
+            put("startDate", startDate.toDateStr());
+            put("endDate", endDate.toDateStr());
+            put("mold", form.getMold());
+            put("userId", StpUtil.getLoginIdAsLong());
+        }};
+        ArrayList<HashMap> list = meetingService.searchOfflineMeetingInWeek(map);
+        ArrayList days = new ArrayList<>();
+        DateRange range = DateUtil.range(startDate, endDate, DateField.DAY_OF_WEEK);
+        range.forEach(one -> {
+            JSONObject json = new JSONObject();
+            json.set("date", one.toString("MM/dd"));
+            json.set("day", one.dayOfWeekEnum().toChinese("周"));
+            days.add(json);
+        });
+        return R.ok().put("list", list).put("days", days);
+    }
+
+    @PostMapping("/deleteMeetingApplication")
+    @Operation(summary = "删除会议申请")
+    @SaCheckLogin
+    public R deleteMeetingApplication(@Valid @RequestBody DeleteMeetingApplicationForm form) {
+        HashMap map = JSONUtil.parse(form).toBean(HashMap.class);
+        map.put("creatorId", StpUtil.getLoginIdAsLong());
+        map.put("userId", StpUtil.getLoginIdAsLong());
+        int rows = meetingService.deleteMeetingApplication(map);
+        return R.ok().put("rows", rows);
     }
 }
